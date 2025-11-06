@@ -5,6 +5,7 @@ import connectDB from './config/mongodb.js'
 import { clerkMiddleware } from '@clerk/express'
 import clerkWebhooks from './controllers/clerkWebhooks.js'
 import bodyParser from 'body-parser'
+import userRouter from './routes/userRoute.js'
 
 connectDB()
 
@@ -20,6 +21,7 @@ app.use('/api/clerk', bodyParser.raw({ type: 'application/json' }), clerkWebhook
 app.use(express.json())
 
 app.get('/', (req, res) => res.send('API is working'))
+app.use('/api/user', userRouter)
 
 const PORT = process.env.PORT || 4000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
