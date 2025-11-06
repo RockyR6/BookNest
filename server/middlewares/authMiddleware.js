@@ -1,4 +1,4 @@
-import User from "../models/UserMode.jsl";
+import User from "../models/UserModel.js";
 
 
 //middleware to check if user authenticated
