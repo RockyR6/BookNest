@@ -15,7 +15,7 @@ app.use(clerkMiddleware())
 
 
 // Use raw body for webhook route
-app.use('/api/clerk', bodyParser.raw({ type: 'application/json' }), clerkWebhooks)
+app.use('/api/clerk', clerkWebhooks)
 
 //Use express.json() for other routes
 app.use(express.json())
