@@ -4,24 +4,22 @@ import cors from 'cors'
 import connectDB from './config/mongodb.js'
 import { clerkMiddleware } from '@clerk/express'
 import clerkWebhooks from './controllers/clerkWebhooks.js'
-
+import bodyParser from 'body-parser'
 
 connectDB()
 
-
 const app = express()
-app.use(cors())// enable cross-origin resource sharing
-
-
-//middleware
-app.use(express.json())
+app.use(cors())
 app.use(clerkMiddleware())
 
-//api to listen to clerk webhooks
-app.use('/api/clerk', clerkWebhooks)
+
+// Use raw body for webhook route
+app.use('/api/clerk', bodyParser.raw({ type: 'application/json' }), clerkWebhooks)
+
+//Use express.json() for other routes
+app.use(express.json())
 
 app.get('/', (req, res) => res.send('API is working'))
 
 const PORT = process.env.PORT || 4000
-
-app.listen(PORT, () => console.log(`Server nunning on port ${PORT}`))
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
