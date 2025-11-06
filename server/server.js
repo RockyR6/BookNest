@@ -4,21 +4,22 @@ import cors from 'cors'
 import connectDB from './config/mongodb.js'
 import { clerkMiddleware } from '@clerk/express'
 import clerkWebhooks from './controllers/clerkWebhooks.js'
-import bodyParser from 'body-parser'
 import userRouter from './routes/userRoute.js'
 
 connectDB()
 
 const app = express()
 app.use(cors())
+
+//middleware
+app.use(express.json())
 app.use(clerkMiddleware())
 
 
 // Use raw body for webhook route
 app.use('/api/clerk', clerkWebhooks)
 
-//Use express.json() for other routes
-app.use(express.json())
+
 
 app.get('/', (req, res) => res.send('API is working'))
 app.use('/api/user', userRouter)
