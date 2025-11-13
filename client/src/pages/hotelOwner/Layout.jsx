@@ -9,7 +9,7 @@ const Layout = () => {
   const { isOwner, navigate } = useAppContext()
 
   return (
-    <div className='bg-amber-300 flex flex-col h-screen mb-30'>
+    <div className=' flex flex-col h-screen mb-30'>
       <Navbar/>
       <div className='flex h-full'>
         <Sidebar/>

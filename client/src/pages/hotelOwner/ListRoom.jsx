@@ -55,7 +55,7 @@ const ListRoom = () => {
   }, [user]);
 
   return (
-    <div className='bg-amber-300'>
+    <div>
       <Title
         align="left"
         font="outfit"
