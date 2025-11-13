@@ -1,12 +1,61 @@
-import React, { useState } from 'react';
-import { roomsDummyData } from '../../assets/assets';
+import React, { useEffect, useState } from 'react';
 import Title from '../../components/Title';
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 const ListRoom = () => {
-  const [rooms, setRooms] = useState(roomsDummyData);
+  const [rooms, setRooms] = useState([]);
+  const { axios, getToken, user, currency } = useAppContext();
+
+  // Fetch rooms belonging to the hotel owner
+  const fetchRooms = async () => {
+    try {
+      const { data } = await axios.get('/api/rooms/owner', {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  // Toggle room availability
+  const toggleAvailability = async (roomId) => {
+    try {
+      const { data } = await axios.post(
+        `/api/rooms/toggle-availability`,
+        { roomId },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        }
+      );
+
+      if (data.success) {
+        const updatedRooms = [...rooms];
+        toast.success(data.message);
+        fetchRooms()
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  
+
+  useEffect(() => {
+    if (user) {
+      fetchRooms();
+    }
+  }, [user]);
 
   return (
-    <div>
+    <div className='bg-amber-300'>
       <Title
         align="left"
         font="outfit"
@@ -20,39 +69,57 @@ const ListRoom = () => {
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               <th className="py-3 px-4 text-gray-800 font-medium">Name</th>
-              <th className="py-3 px-4 text-gray-800 font-medium max-sm:hidden">Facility</th>
+              <th className="py-3 px-4 text-gray-800 font-medium max-sm:hidden">
+                Facility
+              </th>
               <th className="py-3 px-4 text-gray-800 font-medium">Price / night</th>
-              <th className="py-3 px-4 text-gray-800 font-medium text-center">Actions</th>
+              <th className="py-3 px-4 text-gray-800 font-medium text-center">
+                Actions
+              </th>
             </tr>
           </thead>
 
           <tbody className="text-sm">
             {rooms.map((item, index) => (
-              <tr key={index}>
+              <tr key={item._id || index} className="hover:bg-gray-100 transition">
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
                   {item.roomType}
                 </td>
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300 max-sm:hidden">
-                  {item.amenities.join(', ')}
+                  {item.amenities?.join(', ') || '—'}
                 </td>
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
-                  ₹{item.pricePerNight}
+                  {currency} {item.pricePerNight}
                 </td>
                 <td className="py-3 px-4 border-t border-gray-300 text-center">
-                  <label className="relative inline-flex items-center cursor-pointer gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer gap-3 text-gray-900">
                     <input
                       type="checkbox"
                       className="sr-only peer"
                       checked={item.isAvailable}
-                      onChange={() => {}}
+                      onChange={() =>
+                        toggleAvailability(item._id)
+                      }
                     />
-                    <div className="w-12 h-7 bg-slate-300 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200 relative">
-                      <span className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
+                    <div className="w-12 h-7 bg-slate-300 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200">
+                      
                     </div>
+                    <span className="dot absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
                   </label>
                 </td>
               </tr>
             ))}
+
+            {rooms.length === 0 && (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="text-center text-gray-500 py-6 border-t border-gray-300"
+                >
+                  No rooms found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
